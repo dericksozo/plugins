@@ -70,3 +70,10 @@ jobs:
       pr-number: ${{ github.event.number }}
       commit-sha: ${{ github.event.pull_request.head.sha }}
       publish: true
+
+  deprecate:
+    name: Deprecate
+    needs: publish
+    uses: ./.github/workflows/deprecate.template.yaml
+    with:
+      deprecate: true

@@ -1,0 +1,38 @@
+name: _Reusable deprecate template
+
+on:
+  workflow_call:
+    inputs:
+      deprecate:
+        type: boolean
+        description: Flag to indicate whether to run the deprecate job
+        required: false
+        default: false
+
+jobs:
+  deprecate:
+    runs-on: ubuntu-latest
+    if: ${{ needs.publish.outputs.success == 'true' && needs.publish.outputs.published-version == 'latest' }}
+    steps:
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Fetch Latest Version
+        id: fetch_latest_version
+        run: |
+          LATEST_VERSION=$(npm view @${{ github.actor }}/${{ github.event.inputs.plugin }} version)
+          echo "::set-output name=latest-version::$LATEST_VERSION"     
+
+      - name: Deprecate associated beta versions on NPM ❌📦
+        run: |
+          LATEST_VERSION=${{ steps.fetch_latest_version.outputs.latest-version }}
+          PACKAGE_NAME="@${{ github.actor }}/${{ github.event.inputs.plugin }}"
+          VERSIONS=$(npm view $PACKAGE_NAME versions --json)
+          for VERSION in $(echo $VERSIONS | jq -r '.[]' | grep "$LATEST_VERSION-beta"); do
+            npm deprecate $PACKAGE_NAME@$VERSION "This beta version is deprecated, please use version $LATEST_VERSION"
+          done
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
