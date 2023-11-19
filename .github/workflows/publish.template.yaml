@@ -29,6 +29,9 @@ jobs:
   publish:
     if: ${{ inputs.publish }}
     runs-on: ubuntu-latest
+    outputs:
+      success: ${{ steps.publish_outcome.outputs.success }}
+      published-version: ${{ steps.publish_outcome.outputs.published-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
