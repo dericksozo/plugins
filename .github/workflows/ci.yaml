@@ -60,20 +60,20 @@ jobs:
   publish:
     name: Publish
     needs: nx
+    if: ${{ needs.nx.outputs.affected-plugins != '[]' && needs.nx.outputs.affected-plugins != '' }}
     uses: ./.github/workflows/publish.template.yaml
     strategy:
       matrix:
         affected-plugin: ${{ fromJson(needs.nx.outputs.affected-plugins) }}
     with:
       affected-plugin: ${{ matrix.affected-plugin }}
-      event: ${{ github.event.pull_request.number }}
-      pr-number: ${{ github.event.number }}
-      commit-sha: ${{ github.event.pull_request.head.sha }}
-      publish: true
+    secrets:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   deprecate:
     name: Deprecate
     needs: publish
     uses: ./.github/workflows/deprecate.template.yaml
+    if: ${{ needs.publish.outputs.published-version != '' }}
     with:
-      deprecate: true
+      published-version: ${{ needs.publish.outputs.published-version }}
