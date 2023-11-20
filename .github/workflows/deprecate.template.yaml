@@ -3,16 +3,19 @@ name: _Reusable deprecate template
 on:
   workflow_call:
     inputs:
-      deprecate:
-        type: boolean
-        description: Flag to indicate whether to run the deprecate job
-        required: false
-        default: false
+      published-version:
+        type: string
+        description: Published version of the plugin
+        required: true
+    secrets:
+      NODE_AUTH_TOKEN:
+        description: NPM token
+        required: true
 
 jobs:
   deprecate:
     runs-on: ubuntu-latest
-    if: ${{ needs.publish.outputs.success == 'true' && needs.publish.outputs.published-version == 'latest' }}
+    if: ${{ inputs.published-version != 'latest' }}
     steps:
       - name: Setup Node
         uses: actions/setup-node@v3

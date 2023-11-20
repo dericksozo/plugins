@@ -77,3 +77,5 @@ jobs:
     if: ${{ needs.publish.outputs.published-version != '' }}
     with:
       published-version: ${{ needs.publish.outputs.published-version }}
+    secrets:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
